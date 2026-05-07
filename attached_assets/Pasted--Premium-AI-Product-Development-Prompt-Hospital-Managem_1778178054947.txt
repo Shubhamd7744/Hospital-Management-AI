@@ -1,0 +1,598 @@
+# Premium AI Product Development Prompt — Hospital Management System MVP (LAN-Based Offline)
+
+Use this prompt for Lovable, Replit, Cursor, Claude, GPT-5, Bolt, Firebase Studio, or any AI-assisted development workflow.
+
+---
+
+You are a senior healthcare SaaS architect, enterprise product designer, system analyst, and full-stack engineer specializing in offline-first hospital management systems for Indian hospitals.
+
+Your task is to design and develop a premium-quality MVP Hospital Management System (HMS) for a single-location hospital using a LAN-based offline architecture with ultra-fast workflows, minimal training requirements, and enterprise-grade UX principles.
+
+This is NOT a generic CRUD software.
+
+The product must feel:
+
+* Fast
+* Reliable
+* Minimal
+* Operationally efficient
+* Stress-reducing for hospital staff
+* Optimized for low-resource Indian hospital environments
+
+The system must prioritize:
+
+1. OPD workflows
+2. IPD workflows
+3. Mediclaim workflows
+
+The total MVP scope is intentionally constrained for budget-sensitive delivery.
+
+Reference Requirements: 
+
+---
+
+# PRODUCT CONTEXT
+
+Build a LAN-based offline Hospital Management System (HMS) MVP for:
+
+* Single hospital branch
+* 2–5 concurrent users
+* Windows-based local network
+* Offline-first architecture
+* Internal local server deployment
+
+The hospital staff are not highly technical.
+
+The software must reduce:
+
+* Paperwork
+* Waiting time
+* Confusion
+* Training overhead
+* Manual billing errors
+
+The software should operate smoothly even on average hardware.
+
+---
+
+# PRIMARY USERS
+
+## 1. Receptionist
+
+Access:
+
+* Registration
+* Patient search
+* Queue management
+* Billing
+
+Needs:
+
+* Speed
+* Large touch targets
+* Minimal typing
+* Clear workflow states
+
+---
+
+## 2. Doctor
+
+Access:
+
+* Consultation
+* Prescription
+* Patient history
+* Discharge notes
+
+Needs:
+
+* Minimal distractions
+* Fast prescription entry
+* Clean readable layout
+* Quick access to previous visits
+
+---
+
+## 3. Admin
+
+Access:
+
+* Full system control
+* Reports
+* User management
+* Audit logs
+* Backup management
+
+Needs:
+
+* Operational visibility
+* Simplicity
+* Data reliability
+
+---
+
+# CORE MVP MODULES
+
+Build ONLY these modules for Phase 1:
+
+1. Login & Role Management
+2. Patient Registration
+3. Universal Patient Search
+4. OPD Queue Management
+5. Consultation & Prescription
+6. IPD Admission & Bed Allocation
+7. Basic Mediclaim Tracking
+8. Billing & Payments
+9. Discharge Summary
+10. Reports Dashboard
+11. Backup & Audit Logs
+
+DO NOT include:
+
+* Pharmacy
+* Inventory
+* Laboratory
+* Accounting
+* Appointment scheduling
+* Cloud sync
+* Multi-branch support
+* Mobile apps
+
+---
+
+# UX/UI REQUIREMENTS
+
+The interface must follow:
+
+* Apple-level clarity
+* Enterprise healthcare usability
+* High readability
+* Minimal cognitive load
+* Minimal clicks
+* Fast keyboard navigation
+* Responsive desktop layout
+
+Design Principles:
+
+* Superior whitespace usage
+* Strong typography hierarchy
+* Minimal visual clutter
+* Clear status indicators
+* Large actionable components
+* Error prevention-first UX
+* Accessible color contrast
+* Role-based workflow optimization
+
+Visual Direction:
+
+* Clean modern healthcare UI
+* Calm professional appearance
+* Soft neutral colors
+* Minimal gradients
+* Minimal shadows
+* Structured layouts
+
+The product should visually feel like:
+
+* Linear
+* Notion
+* Stripe Dashboard
+* Modern EMR systems
+* Enterprise SaaS products
+
+---
+
+# CRITICAL SYSTEM REQUIREMENTS
+
+## PERFORMANCE
+
+* Screen load under 2 seconds
+* Instant patient search
+* Optimized local database queries
+* Smooth LAN performance
+
+---
+
+## OFFLINE-FIRST
+
+The software MUST:
+
+* Work fully offline
+* Run on LAN network
+* Continue functioning without internet
+* Store all data locally
+
+---
+
+## SECURITY
+
+Implement:
+
+* Role-based access
+* Session management
+* Audit trails
+* Secure login
+* Local encrypted database if possible
+
+---
+
+# MODULE REQUIREMENTS
+
+# 1. LOGIN & ACCESS CONTROL
+
+Features:
+
+* Secure login screen
+* Role-based dashboards
+* Session timeout
+* Audit logging
+
+Roles:
+
+* Reception
+* Doctor
+* Admin
+
+Dashboard must show:
+
+* Quick action cards
+* Today's statistics
+* Bed occupancy snapshot
+* Pending mediclaim summary
+* Queue status
+
+---
+
+# 2. PATIENT REGISTRATION
+
+Requirements:
+
+* Fast registration workflow
+* Auto-generated patient ID
+* Duplicate mobile detection
+* Minimal mandatory fields
+
+Fields:
+
+* Name
+* Age/DOB
+* Gender
+* Mobile Number
+* Address
+* Emergency Contact
+
+Optional:
+
+* Aadhaar
+* ID proof
+
+UX Requirements:
+
+* Large form inputs
+* Inline validation
+* Keyboard-first navigation
+* Fast save flow
+
+---
+
+# 3. UNIVERSAL PATIENT SEARCH (CRITICAL MODULE)
+
+This is the most important workflow.
+
+Search by:
+
+* Patient ID
+* Name
+* Mobile number
+
+Requirements:
+
+* Fuzzy search
+* Partial matching
+* Instant results
+* Recent visit prioritization
+
+Search results must display:
+
+* Patient name
+* Patient ID
+* Mobile number
+* Last visit date
+
+UX Requirements:
+
+* Extremely fast
+* Minimal typing required
+* Accessible from every screen
+
+---
+
+# 4. OPD MANAGEMENT
+
+Features:
+
+* Daily token generation
+* Queue management
+* Consultation workflow
+
+Queue states:
+
+* Waiting
+* In Consultation
+* Completed
+
+Doctor can:
+
+* Open patient file
+* Add symptoms
+* Add diagnosis
+* Write prescription
+* View visit history
+
+---
+
+# 5. PRESCRIPTION SYSTEM
+
+Features:
+
+* Text-based digital prescription
+* Printable prescription
+* Historical prescriptions
+
+Requirements:
+
+* Fast typing experience
+* Clean print layout
+* Minimal visual clutter
+
+No pharmacy integration.
+
+---
+
+# 6. IPD MANAGEMENT
+
+Workflow:
+Admission → Treatment → Discharge
+
+Features:
+
+* Admit patient
+* Assign doctor
+* Assign room/bed
+* Bed occupancy tracking
+
+Room Types:
+
+* General
+* Semi-Special
+* Special
+
+Bed states:
+
+* Available
+* Occupied
+
+Admission Types:
+
+* Cash
+* Mediclaim
+
+---
+
+# 7. MEDICLAIM MODULE
+
+This is a priority MVP module.
+
+Features:
+
+* Insurance information storage
+* Pre-authorization tracking
+* Claim status tracking
+
+Fields:
+
+* Insurance provider
+* Policy number
+* TPA name
+* Sum insured
+* Claim status
+* Preauth status
+
+Statuses:
+
+* Pending
+* Submitted
+* Approved
+* Rejected
+
+The workflow must be simple for non-technical staff.
+
+---
+
+# 8. BILLING SYSTEM
+
+Features:
+
+* OPD billing
+* IPD billing
+* Itemized billing
+* Automatic calculations
+
+Charge Types:
+
+* Consultation
+* Bed charges
+* Procedures
+* Doctor visits
+
+Payment Modes:
+
+* Cash
+* Mediclaim
+
+Outputs:
+
+* Printable receipt
+* Printable final bill
+* Itemized invoice
+
+UX Requirements:
+
+* Fast bill creation
+* Error prevention
+* Editable before finalization
+
+---
+
+# 9. DISCHARGE SUMMARY
+
+Features:
+
+* Printable discharge summary
+* Historical storage
+
+Summary includes:
+
+* Patient details
+* Diagnosis
+* Treatment
+* Procedures
+* Medications
+* Follow-up advice
+* Doctor signature
+
+The print layout must look professional and medically structured.
+
+---
+
+# 10. REPORTS DASHBOARD
+
+Include:
+
+* Daily OPD count
+* Daily IPD admissions
+* Daily discharges
+* Bed occupancy
+* Revenue summary
+* Pending claims
+
+Requirements:
+
+* Simple charts
+* Fast loading
+* Printable reports
+
+---
+
+# 11. AUDIT LOGS & BACKUPS
+
+Track:
+
+* Login activity
+* Patient edits
+* Billing edits
+* Prescription updates
+
+Audit fields:
+
+* User
+* Timestamp
+* Action performed
+
+Backup Features:
+
+* Automatic daily backup
+* Manual backup export
+* SQL backup support
+
+---
+
+# TECH STACK REQUIREMENTS
+
+Suggest the best modern low-cost stack for:
+
+* LAN-based offline desktop/web application
+* Fast development
+* Maintainability
+* Low infrastructure cost
+* Non-cloud deployment
+
+Preferred stack characteristics:
+
+* SQLite/PostgreSQL local database
+* Electron or local web app
+* React frontend
+* Fast local API
+* Role-based architecture
+* Offline-first design
+
+The architecture must be scalable for future:
+
+* Pharmacy
+* Lab
+* Cloud sync
+* Multi-branch support
+
+---
+
+# DEVELOPMENT OUTPUTS REQUIRED
+
+Generate:
+
+1. Complete system architecture
+2. Database schema
+3. User flow diagrams
+4. Information architecture
+5. Dashboard wireframes
+6. UI screen designs
+7. Component system
+8. Role-based navigation
+9. API structure
+10. Folder structure
+11. MVP roadmap
+12. Future scalability roadmap
+13. Edge cases
+14. Error handling system
+15. Backup strategy
+16. Deployment architecture
+17. LAN deployment guide
+18. Offline sync logic
+19. Admin controls
+20. Print layouts
+
+---
+
+# IMPORTANT CONSTRAINTS
+
+You MUST optimize for:
+
+* ₹1 lakh MVP budget
+* Fast delivery timeline
+* Minimal complexity
+* High operational reliability
+* Low maintenance
+* Small hospital environments
+
+Avoid:
+
+* Overengineering
+* Enterprise complexity
+* Cloud dependencies
+* Heavy infrastructure
+* Unnecessary AI features
+
+---
+
+# FINAL EXPECTATION
+
+The final HMS MVP should feel:
+
+* Premium
+* Fast
+* Calm
+* Professional
+* Operationally reliable
+* Easy for hospital staff
+* Future-scalable
+
+The design and system architecture should resemble a modern healthcare SaaS product rather than outdated hospital software.

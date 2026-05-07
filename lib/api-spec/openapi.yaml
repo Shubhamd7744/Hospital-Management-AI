@@ -3,20 +3,42 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Hospital Management System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User management
+  - name: patients
+    description: Patient registration and search
+  - name: opd
+    description: OPD queue management
+  - name: consultations
+    description: Consultations and prescriptions
+  - name: ipd
+    description: IPD admissions and bed management
+  - name: mediclaim
+    description: Mediclaim tracking
+  - name: billing
+    description: Billing and payments
+  - name: discharge
+    description: Discharge summaries
+  - name: reports
+    description: Reports and dashboard
+  - name: audit
+    description: Audit logs
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +46,793 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # AUTH
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current session
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  # USERS
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User deleted
+
+  # PATIENTS
+  /patients:
+    get:
+      operationId: listPatients
+      tags: [patients]
+      summary: List patients with optional search
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search by name, mobile, or patient ID
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Patient list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientListResponse"
+    post:
+      operationId: createPatient
+      tags: [patients]
+      summary: Register a new patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePatientRequest"
+      responses:
+        "201":
+          description: Patient registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+
+  /patients/{id}:
+    get:
+      operationId: getPatient
+      tags: [patients]
+      summary: Get patient by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Patient details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "404":
+          description: Not found
+    patch:
+      operationId: updatePatient
+      tags: [patients]
+      summary: Update patient details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePatientRequest"
+      responses:
+        "200":
+          description: Patient updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+
+  /patients/{id}/visits:
+    get:
+      operationId: getPatientVisits
+      tags: [patients]
+      summary: Get visit history for a patient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Visit history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VisitSummary"
+
+  # OPD
+  /opd/queue:
+    get:
+      operationId: getOpdQueue
+      tags: [opd]
+      summary: Get today's OPD queue
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OPD queue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpdToken"
+    post:
+      operationId: createOpdToken
+      tags: [opd]
+      summary: Add patient to OPD queue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpdTokenRequest"
+      responses:
+        "201":
+          description: Token created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpdToken"
+
+  /opd/queue/{id}/status:
+    patch:
+      operationId: updateOpdTokenStatus
+      tags: [opd]
+      summary: Update OPD token status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOpdStatusRequest"
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpdToken"
+
+  # CONSULTATIONS
+  /consultations:
+    post:
+      operationId: createConsultation
+      tags: [consultations]
+      summary: Create a consultation record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConsultationRequest"
+      responses:
+        "201":
+          description: Consultation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consultation"
+
+  /consultations/{id}:
+    get:
+      operationId: getConsultation
+      tags: [consultations]
+      summary: Get consultation details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Consultation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consultation"
+    patch:
+      operationId: updateConsultation
+      tags: [consultations]
+      summary: Update a consultation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConsultationRequest"
+      responses:
+        "200":
+          description: Consultation updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consultation"
+
+  # IPD
+  /ipd/beds:
+    get:
+      operationId: listBeds
+      tags: [ipd]
+      summary: Get all beds with occupancy status
+      responses:
+        "200":
+          description: Bed list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bed"
+    post:
+      operationId: createBed
+      tags: [ipd]
+      summary: Create a new bed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBedRequest"
+      responses:
+        "201":
+          description: Bed created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bed"
+
+  /ipd/admissions:
+    get:
+      operationId: listAdmissions
+      tags: [ipd]
+      summary: List current IPD admissions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [admitted, discharged]
+      responses:
+        "200":
+          description: Admissions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Admission"
+    post:
+      operationId: createAdmission
+      tags: [ipd]
+      summary: Admit a patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdmissionRequest"
+      responses:
+        "201":
+          description: Patient admitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+
+  /ipd/admissions/{id}:
+    get:
+      operationId: getAdmission
+      tags: [ipd]
+      summary: Get admission details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Admission details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+    patch:
+      operationId: updateAdmission
+      tags: [ipd]
+      summary: Update admission details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdmissionRequest"
+      responses:
+        "200":
+          description: Admission updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+
+  # MEDICLAIM
+  /mediclaim:
+    get:
+      operationId: listMediclaims
+      tags: [mediclaim]
+      summary: List mediclaim records
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, submitted, approved, rejected]
+      responses:
+        "200":
+          description: Mediclaim list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mediclaim"
+    post:
+      operationId: createMediclaim
+      tags: [mediclaim]
+      summary: Create a mediclaim record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMediclaimRequest"
+      responses:
+        "201":
+          description: Mediclaim created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mediclaim"
+
+  /mediclaim/{id}:
+    patch:
+      operationId: updateMediclaim
+      tags: [mediclaim]
+      summary: Update mediclaim status/details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMediclaimRequest"
+      responses:
+        "200":
+          description: Mediclaim updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mediclaim"
+
+  # BILLING
+  /billing:
+    get:
+      operationId: listBills
+      tags: [billing]
+      summary: List bills
+      parameters:
+        - name: patientId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, final, paid]
+      responses:
+        "200":
+          description: Bill list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bill"
+    post:
+      operationId: createBill
+      tags: [billing]
+      summary: Create a new bill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBillRequest"
+      responses:
+        "201":
+          description: Bill created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bill"
+
+  /billing/{id}:
+    get:
+      operationId: getBill
+      tags: [billing]
+      summary: Get bill details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bill details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bill"
+    patch:
+      operationId: updateBill
+      tags: [billing]
+      summary: Update a bill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBillRequest"
+      responses:
+        "200":
+          description: Bill updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bill"
+
+  # DISCHARGE
+  /discharge:
+    post:
+      operationId: createDischarge
+      tags: [discharge]
+      summary: Create a discharge summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDischargeRequest"
+      responses:
+        "201":
+          description: Discharge summary created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DischargeSummary"
+
+  /discharge/{id}:
+    get:
+      operationId: getDischarge
+      tags: [discharge]
+      summary: Get discharge summary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Discharge summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DischargeSummary"
+    patch:
+      operationId: updateDischarge
+      tags: [discharge]
+      summary: Update discharge summary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDischargeRequest"
+      responses:
+        "200":
+          description: Discharge summary updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DischargeSummary"
+
+  # REPORTS
+  /reports/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [reports]
+      summary: Get today's dashboard statistics
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /reports/revenue:
+    get:
+      operationId: getRevenueReport
+      tags: [reports]
+      summary: Get revenue summary report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Revenue report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevenueReport"
+
+  /reports/opd-trend:
+    get:
+      operationId: getOpdTrend
+      tags: [reports]
+      summary: Get OPD count trend for last N days
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 7
+      responses:
+        "200":
+          description: OPD trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyCount"
+
+  /reports/bed-occupancy:
+    get:
+      operationId: getBedOccupancy
+      tags: [reports]
+      summary: Get bed occupancy breakdown by room type
+      responses:
+        "200":
+          description: Bed occupancy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BedOccupancy"
+
+  # AUDIT LOGS
+  /audit:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: Get audit logs
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: action
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogListResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +843,979 @@ components:
       required:
         - status
 
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    AuthResult:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, doctor, receptionist]
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - name
+        - role
+        - active
+        - createdAt
+
+    CreateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, doctor, receptionist]
+      required:
+        - username
+        - password
+        - name
+        - role
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [admin, doctor, receptionist]
+        active:
+          type: boolean
+
+    Patient:
+      type: object
+      properties:
+        id:
+          type: integer
+        patientId:
+          type: string
+          description: Human-readable patient ID e.g. P-00001
+        name:
+          type: string
+        age:
+          type: ["integer", "null"]
+        dob:
+          type: ["string", "null"]
+          format: date
+        gender:
+          type: string
+          enum: [male, female, other]
+        mobile:
+          type: string
+        address:
+          type: ["string", "null"]
+        emergencyContact:
+          type: ["string", "null"]
+        aadhaar:
+          type: ["string", "null"]
+        bloodGroup:
+          type: ["string", "null"]
+        lastVisitDate:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - patientId
+        - name
+        - gender
+        - mobile
+        - createdAt
+
+    CreatePatientRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: ["integer", "null"]
+        dob:
+          type: ["string", "null"]
+          format: date
+        gender:
+          type: string
+          enum: [male, female, other]
+        mobile:
+          type: string
+        address:
+          type: ["string", "null"]
+        emergencyContact:
+          type: ["string", "null"]
+        aadhaar:
+          type: ["string", "null"]
+        bloodGroup:
+          type: ["string", "null"]
+      required:
+        - name
+        - gender
+        - mobile
+
+    UpdatePatientRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: ["integer", "null"]
+        dob:
+          type: ["string", "null"]
+          format: date
+        gender:
+          type: string
+          enum: [male, female, other]
+        mobile:
+          type: string
+        address:
+          type: ["string", "null"]
+        emergencyContact:
+          type: ["string", "null"]
+        aadhaar:
+          type: ["string", "null"]
+        bloodGroup:
+          type: ["string", "null"]
+
+    PatientListResponse:
+      type: object
+      properties:
+        patients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Patient"
+        total:
+          type: integer
+      required:
+        - patients
+        - total
+
+    VisitSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [opd, ipd]
+        date:
+          type: string
+          format: date-time
+        doctorName:
+          type: ["string", "null"]
+        diagnosis:
+          type: ["string", "null"]
+        status:
+          type: string
+      required:
+        - id
+        - type
+        - date
+        - status
+
+    OpdToken:
+      type: object
+      properties:
+        id:
+          type: integer
+        tokenNumber:
+          type: integer
+        patientId:
+          type: integer
+        patientName:
+          type: string
+        patientMobile:
+          type: string
+        doctorId:
+          type: ["integer", "null"]
+        doctorName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [waiting, in_consultation, completed, cancelled]
+        consultationId:
+          type: ["integer", "null"]
+        date:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tokenNumber
+        - patientId
+        - patientName
+        - patientMobile
+        - status
+        - date
+        - createdAt
+
+    CreateOpdTokenRequest:
+      type: object
+      properties:
+        patientId:
+          type: integer
+        doctorId:
+          type: ["integer", "null"]
+        visitType:
+          type: string
+          enum: [cash, mediclaim]
+          default: cash
+      required:
+        - patientId
+
+    UpdateOpdStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [waiting, in_consultation, completed, cancelled]
+        doctorId:
+          type: ["integer", "null"]
+      required:
+        - status
+
+    Consultation:
+      type: object
+      properties:
+        id:
+          type: integer
+        patientId:
+          type: integer
+        patientName:
+          type: string
+        opdTokenId:
+          type: ["integer", "null"]
+        doctorId:
+          type: integer
+        doctorName:
+          type: string
+        symptoms:
+          type: ["string", "null"]
+        diagnosis:
+          type: ["string", "null"]
+        prescription:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        followUpDate:
+          type: ["string", "null"]
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - patientId
+        - patientName
+        - doctorId
+        - doctorName
+        - createdAt
+
+    CreateConsultationRequest:
+      type: object
+      properties:
+        patientId:
+          type: integer
+        opdTokenId:
+          type: ["integer", "null"]
+        doctorId:
+          type: integer
+        symptoms:
+          type: ["string", "null"]
+        diagnosis:
+          type: ["string", "null"]
+        prescription:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        followUpDate:
+          type: ["string", "null"]
+          format: date
+      required:
+        - patientId
+        - doctorId
+
+    UpdateConsultationRequest:
+      type: object
+      properties:
+        symptoms:
+          type: ["string", "null"]
+        diagnosis:
+          type: ["string", "null"]
+        prescription:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        followUpDate:
+          type: ["string", "null"]
+          format: date
+
+    Bed:
+      type: object
+      properties:
+        id:
+          type: integer
+        bedNumber:
+          type: string
+        roomType:
+          type: string
+          enum: [general, semi_special, special]
+        wardName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [available, occupied]
+        currentAdmissionId:
+          type: ["integer", "null"]
+        currentPatientName:
+          type: ["string", "null"]
+      required:
+        - id
+        - bedNumber
+        - roomType
+        - status
+
+    CreateBedRequest:
+      type: object
+      properties:
+        bedNumber:
+          type: string
+        roomType:
+          type: string
+          enum: [general, semi_special, special]
+        wardName:
+          type: ["string", "null"]
+      required:
+        - bedNumber
+        - roomType
+
+    Admission:
+      type: object
+      properties:
+        id:
+          type: integer
+        patientId:
+          type: integer
+        patientName:
+          type: string
+        patientMobile:
+          type: string
+        bedId:
+          type: integer
+        bedNumber:
+          type: string
+        roomType:
+          type: string
+          enum: [general, semi_special, special]
+        doctorId:
+          type: ["integer", "null"]
+        doctorName:
+          type: ["string", "null"]
+        admissionType:
+          type: string
+          enum: [cash, mediclaim]
+        status:
+          type: string
+          enum: [admitted, discharged]
+        admissionDate:
+          type: string
+          format: date-time
+        dischargeDate:
+          type: ["string", "null"]
+          format: date-time
+        diagnosis:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - patientId
+        - patientName
+        - patientMobile
+        - bedId
+        - bedNumber
+        - roomType
+        - admissionType
+        - status
+        - admissionDate
+        - createdAt
+
+    CreateAdmissionRequest:
+      type: object
+      properties:
+        patientId:
+          type: integer
+        bedId:
+          type: integer
+        doctorId:
+          type: ["integer", "null"]
+        admissionType:
+          type: string
+          enum: [cash, mediclaim]
+        diagnosis:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - patientId
+        - bedId
+        - admissionType
+
+    UpdateAdmissionRequest:
+      type: object
+      properties:
+        bedId:
+          type: integer
+        doctorId:
+          type: ["integer", "null"]
+        diagnosis:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [admitted, discharged]
+        dischargeDate:
+          type: ["string", "null"]
+          format: date-time
+
+    Mediclaim:
+      type: object
+      properties:
+        id:
+          type: integer
+        patientId:
+          type: integer
+        patientName:
+          type: string
+        admissionId:
+          type: ["integer", "null"]
+        insuranceProvider:
+          type: string
+        policyNumber:
+          type: string
+        tpaName:
+          type: ["string", "null"]
+        sumInsured:
+          type: ["number", "null"]
+        claimAmount:
+          type: ["number", "null"]
+        claimStatus:
+          type: string
+          enum: [pending, submitted, approved, rejected]
+        preauthStatus:
+          type: string
+          enum: [pending, submitted, approved, rejected]
+        preauthAmount:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - patientId
+        - patientName
+        - insuranceProvider
+        - policyNumber
+        - claimStatus
+        - preauthStatus
+        - createdAt
+        - updatedAt
+
+    CreateMediclaimRequest:
+      type: object
+      properties:
+        patientId:
+          type: integer
+        admissionId:
+          type: ["integer", "null"]
+        insuranceProvider:
+          type: string
+        policyNumber:
+          type: string
+        tpaName:
+          type: ["string", "null"]
+        sumInsured:
+          type: ["number", "null"]
+        claimAmount:
+          type: ["number", "null"]
+        preauthAmount:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - patientId
+        - insuranceProvider
+        - policyNumber
+
+    UpdateMediclaimRequest:
+      type: object
+      properties:
+        claimStatus:
+          type: string
+          enum: [pending, submitted, approved, rejected]
+        preauthStatus:
+          type: string
+          enum: [pending, submitted, approved, rejected]
+        claimAmount:
+          type: ["number", "null"]
+        preauthAmount:
+          type: ["number", "null"]
+        tpaName:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    BillItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+        chargeType:
+          type: string
+          enum: [consultation, bed, procedure, doctor_visit, other]
+        quantity:
+          type: number
+        unitPrice:
+          type: number
+        amount:
+          type: number
+      required:
+        - id
+        - description
+        - chargeType
+        - quantity
+        - unitPrice
+        - amount
+
+    Bill:
+      type: object
+      properties:
+        id:
+          type: integer
+        billNumber:
+          type: string
+        patientId:
+          type: integer
+        patientName:
+          type: string
+        admissionId:
+          type: ["integer", "null"]
+        billType:
+          type: string
+          enum: [opd, ipd]
+        paymentMode:
+          type: string
+          enum: [cash, mediclaim]
+        status:
+          type: string
+          enum: [draft, final, paid]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BillItem"
+        subtotal:
+          type: number
+        discount:
+          type: number
+        totalAmount:
+          type: number
+        paidAmount:
+          type: number
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - billNumber
+        - patientId
+        - patientName
+        - billType
+        - paymentMode
+        - status
+        - items
+        - subtotal
+        - discount
+        - totalAmount
+        - paidAmount
+        - createdAt
+        - updatedAt
+
+    CreateBillRequest:
+      type: object
+      properties:
+        patientId:
+          type: integer
+        admissionId:
+          type: ["integer", "null"]
+        billType:
+          type: string
+          enum: [opd, ipd]
+        paymentMode:
+          type: string
+          enum: [cash, mediclaim]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateBillItemRequest"
+        discount:
+          type: number
+          default: 0
+        paidAmount:
+          type: number
+          default: 0
+        notes:
+          type: ["string", "null"]
+      required:
+        - patientId
+        - billType
+        - paymentMode
+        - items
+
+    CreateBillItemRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        chargeType:
+          type: string
+          enum: [consultation, bed, procedure, doctor_visit, other]
+        quantity:
+          type: number
+        unitPrice:
+          type: number
+      required:
+        - description
+        - chargeType
+        - quantity
+        - unitPrice
+
+    UpdateBillRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [draft, final, paid]
+        paymentMode:
+          type: string
+          enum: [cash, mediclaim]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateBillItemRequest"
+        discount:
+          type: number
+        paidAmount:
+          type: number
+        notes:
+          type: ["string", "null"]
+
+    DischargeSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        admissionId:
+          type: integer
+        patientId:
+          type: integer
+        patientName:
+          type: string
+        doctorId:
+          type: ["integer", "null"]
+        doctorName:
+          type: ["string", "null"]
+        admissionDate:
+          type: string
+          format: date-time
+        dischargeDate:
+          type: string
+          format: date-time
+        finalDiagnosis:
+          type: ["string", "null"]
+        treatmentSummary:
+          type: ["string", "null"]
+        procedures:
+          type: ["string", "null"]
+        medications:
+          type: ["string", "null"]
+        followUpAdvice:
+          type: ["string", "null"]
+        condition:
+          type: string
+          enum: [stable, improved, critical, expired]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - admissionId
+        - patientId
+        - patientName
+        - admissionDate
+        - dischargeDate
+        - condition
+        - createdAt
+
+    CreateDischargeRequest:
+      type: object
+      properties:
+        admissionId:
+          type: integer
+        doctorId:
+          type: ["integer", "null"]
+        dischargeDate:
+          type: string
+          format: date-time
+        finalDiagnosis:
+          type: ["string", "null"]
+        treatmentSummary:
+          type: ["string", "null"]
+        procedures:
+          type: ["string", "null"]
+        medications:
+          type: ["string", "null"]
+        followUpAdvice:
+          type: ["string", "null"]
+        condition:
+          type: string
+          enum: [stable, improved, critical, expired]
+      required:
+        - admissionId
+        - dischargeDate
+        - condition
+
+    UpdateDischargeRequest:
+      type: object
+      properties:
+        finalDiagnosis:
+          type: ["string", "null"]
+        treatmentSummary:
+          type: ["string", "null"]
+        procedures:
+          type: ["string", "null"]
+        medications:
+          type: ["string", "null"]
+        followUpAdvice:
+          type: ["string", "null"]
+        condition:
+          type: string
+          enum: [stable, improved, critical, expired]
+
+    DashboardStats:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        opdCount:
+          type: integer
+        opdCompleted:
+          type: integer
+        opdWaiting:
+          type: integer
+        ipdAdmissions:
+          type: integer
+        ipdDischarges:
+          type: integer
+        currentIpdCensus:
+          type: integer
+        totalBeds:
+          type: integer
+        availableBeds:
+          type: integer
+        occupiedBeds:
+          type: integer
+        todayRevenue:
+          type: number
+        pendingClaims:
+          type: integer
+      required:
+        - date
+        - opdCount
+        - opdCompleted
+        - opdWaiting
+        - ipdAdmissions
+        - ipdDischarges
+        - currentIpdCensus
+        - totalBeds
+        - availableBeds
+        - occupiedBeds
+        - todayRevenue
+        - pendingClaims
+
+    RevenueReport:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        totalRevenue:
+          type: number
+        cashRevenue:
+          type: number
+        mediclaimRevenue:
+          type: number
+        opdRevenue:
+          type: number
+        ipdRevenue:
+          type: number
+        pendingAmount:
+          type: number
+      required:
+        - from
+        - to
+        - totalRevenue
+        - cashRevenue
+        - mediclaimRevenue
+        - opdRevenue
+        - ipdRevenue
+        - pendingAmount
+
+    DailyCount:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        count:
+          type: integer
+      required:
+        - date
+        - count
+
+    BedOccupancy:
+      type: object
+      properties:
+        total:
+          type: integer
+        occupied:
+          type: integer
+        available:
+          type: integer
+        byRoomType:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomTypeOccupancy"
+      required:
+        - total
+        - occupied
+        - available
+        - byRoomType
+
+    RoomTypeOccupancy:
+      type: object
+      properties:
+        roomType:
+          type: string
+          enum: [general, semi_special, special]
+        total:
+          type: integer
+        occupied:
+          type: integer
+        available:
+          type: integer
+      required:
+        - roomType
+        - total
+        - occupied
+        - available
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["integer", "null"]
+        userName:
+          type: ["string", "null"]
+        action:
+          type: string
+        entity:
+          type: string
+        entityId:
+          type: ["string", "null"]
+        details:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - action
+        - entity
+        - createdAt
+
+    AuditLogListResponse:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+      required:
+        - logs
+        - total
